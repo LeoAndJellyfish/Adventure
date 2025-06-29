@@ -1,73 +1,35 @@
-# AI 聊天桌面应用
+# Adventure AI
 
-一个基于 Tauri 的现代化 AI 聊天桌面应用，支持多种 AI 服务提供商。
+一个基于 Tauri 的现代化 AI 桌面应用，支持多种 AI 服务和本地模型。
 
 ## 功能特性
 
-### 🤖 AI 聊天功能
-- 支持多种 AI 服务提供商：
+### 🤖 AI 功能
+- 支持多种 AI 服务：
   - OpenAI (GPT-3.5, GPT-4, GPT-4 Turbo)
-  - Anthropic (Claude 3 Opus, Sonnet, Haiku)
+  - Anthropic (Claude 3)
   - Ollama (本地大语言模型)
-  - 自定义 API 服务
-- 实时聊天界面，支持消息历史记录
-- AI 输入状态指示器
-- 智能消息回复和上下文理解
-- 自定义模型名称支持
+  - 自定义 API 端点
+- 实时对话界面
+- 上下文感知的智能回复
+- 自定义模型和参数配置
 
-### ⚙️ 设置管理
-- API 密钥安全存储（本地存储）
-- 模型选择和参数配置
-- 自定义模型名称输入
-- 温度控制（创造性程度）
-- 最大 Token 数限制
-- 自定义系统提示词
-- API 连接测试功能
-- 可滚动的设置界面
+### ⚙️ 设置
+- 安全的 API 密钥管理
+- 灵活的模型配置
+- 温度、Token 限制等参数调整
+- 系统提示词定制
+- API 连接测试
 
-### 💾 数据管理
-- 聊天记录导出/导入
-- 本地数据清空
-- 历史记录限制设置
+### 💾 数据
+- 对话历史导出/导入
+- 本地数据管理
 
-### 🎨 用户界面
-- 现代化设计风格
+### 🎨 界面
+- 现代化设计
+- 深色/浅色主题
 - 响应式布局
-- 侧边栏导航
-- 深色主题支持
-- 流畅的动画效果
-- 滚动优化
-
-## 快速开始
-
-### 1. 安装依赖
-
-```bash
-# 安装 Node.js 依赖
-npm install
-
-# 安装 Rust 依赖 (Tauri)
-cd src-tauri
-cargo build
-```
-
-### 2. 配置 AI 服务
-
-1. 启动应用
-2. 点击侧边栏的"设置"
-3. 选择 AI 服务提供商
-4. 输入您的 API 密钥（Ollama 不需要）
-5. 选择模型和配置参数
-6. 如需自定义模型，选择"自定义模型"并输入模型名称
-7. 点击"测试连接"验证配置
-8. 保存设置
-
-### 3. 开始聊天
-
-1. 点击侧边栏的"聊天"
-2. 在输入框中输入消息
-3. 按 Enter 或点击发送按钮
-4. 等待 AI 回复
+- 流畅的交互体验
 
 ## API 配置说明
 
@@ -118,34 +80,6 @@ cargo build
 - 输入具体的模型名称
 - 支持任何兼容的模型标识符
 
-## Ollama 使用指南
-
-### 安装 Ollama
-1. 访问 [ollama.ai](https://ollama.ai/)
-2. 下载适合您系统的版本
-3. 安装并启动 Ollama 服务
-
-### 常用模型
-```bash
-# 拉取基础模型
-ollama pull llama2
-ollama pull mistral
-ollama pull codellama
-
-# 拉取中文模型
-ollama pull qwen
-ollama pull chinese-llama-2
-
-# 查看已安装模型
-ollama list
-```
-
-### 配置应用
-1. 在设置中选择"Ollama (本地)"
-2. 确认基础 URL 为 `http://localhost:11434`
-3. 选择已安装的模型或输入自定义模型名称
-4. 测试连接
-
 ## 开发
 
 ### 项目结构
@@ -156,19 +90,22 @@ src/
 │   ├── Settings.js     # 设置页面
 │   └── ...
 ├── services/           # 服务层
-│   └── aiService.js    # AI 服务
+│   ├── aiService.js    # AI 服务
+│   ├── settingsService.js # 设置服务
+│   └── ...
 ├── styles.css          # 样式文件
+├── index.html          # 主页面
 └── main.js            # 主入口
 ```
 
 ### 运行开发服务器
 ```bash
-npm run tauri dev
+cargo tauri dev
 ```
 
 ### 构建生产版本
 ```bash
-npm run tauri build
+cargo tauri build
 ```
 
 ## 安全说明
