@@ -569,6 +569,7 @@ export function initAdventure() {
       if (story.options && story.options.length > 0) {
         showBranchOptions(story.options);
       }
+      updateActionButtons();
     } catch (error) {
       hideTypingIndicator();
       const textDiv = aiDiv.querySelector('.story-text');
@@ -630,92 +631,14 @@ export function initAdventure() {
   function clearStory() {
     if (confirm('确定要清空所有故事记录吗？')) {
       adventureService.clearStoryHistory();
-      storyMessages.innerHTML = `
-        <div class="story-welcome">
-          <div class="welcome-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 7l10 5 10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <h3>欢迎来到冒险世界！</h3>
-          <p>点击"开始新冒险"按钮，开启你的奇幻之旅。在这里，你的每个选择都将影响故事的发展方向。</p>
-          
-          <div class="theme-selection" id="themeSelection" style="display: none;">
-            <h4>选择冒险主题：</h4>
-            <div class="theme-grid" id="themeGrid">
-              <div class="theme-card" data-theme="奇幻冒险">
-                <div class="theme-icon">🧙‍♂️</div>
-                <div class="theme-name">奇幻冒险</div>
-                <div class="theme-desc">魔法、巨龙、骑士与公主</div>
-              </div>
-              <div class="theme-card" data-theme="科幻探索">
-                <div class="theme-icon">🚀</div>
-                <div class="theme-name">科幻探索</div>
-                <div class="theme-desc">太空、机器人、未来科技</div>
-              </div>
-              <div class="theme-card" data-theme="悬疑推理">
-                <div class="theme-icon">🔍</div>
-                <div class="theme-name">悬疑推理</div>
-                <div class="theme-desc">谜题、线索、真相探索</div>
-              </div>
-              <div class="theme-card" data-theme="古代武侠">
-                <div class="theme-icon">⚔️</div>
-                <div class="theme-name">古代武侠</div>
-                <div class="theme-desc">江湖、武功、侠义精神</div>
-              </div>
-              <div class="theme-card" data-theme="现代都市">
-                <div class="theme-icon">🏙️</div>
-                <div class="theme-name">现代都市</div>
-                <div class="theme-desc">城市、职场、生活故事</div>
-              </div>
-              <div class="theme-card" data-theme="恐怖惊悚">
-                <div class="theme-icon">👻</div>
-                <div class="theme-name">恐怖惊悚</div>
-                <div class="theme-desc">鬼怪、惊悚、生存挑战</div>
-              </div>
-            </div>
-            
-            <div class="story-background-section" id="storyBackgroundSection">
-              <h5>故事背景设定（可选）：</h5>
-              <div class="background-inputs">
-                <div class="background-input-group">
-                  <label for="characterName">主角名称：</label>
-                  <input type="text" id="characterName" placeholder="如：艾莉娅、杰克等" maxlength="20">
-                </div>
-                <div class="background-input-group">
-                  <label for="characterRole">主角身份：</label>
-                  <input type="text" id="characterRole" placeholder="如：魔法师、侦探、武士等" maxlength="30">
-                </div>
-                <div class="background-input-group">
-                  <label for="worldSetting">世界设定：</label>
-                  <textarea id="worldSetting" placeholder="描述故事发生的世界背景，如：一个被魔法笼罩的中世纪王国，科技与魔法并存..." rows="3" maxlength="200"></textarea>
-                </div>
-                <div class="background-input-group">
-                  <label for="storyGoal">故事目标：</label>
-                  <textarea id="storyGoal" placeholder="描述主角的目标或任务，如：寻找失落的魔法宝石，解开古老的谜题..." rows="3" maxlength="200"></textarea>
-                </div>
-              </div>
-            </div>
-            
-            <div class="theme-actions">
-              <button class="btn btn-secondary" id="customThemeBtn">自定义主题</button>
-              <button class="btn btn-secondary" id="toggleBackgroundBtn">详细背景设定</button>
-              <button class="btn btn-primary" id="confirmThemeBtn" disabled>开始冒险</button>
-            </div>
-          </div>
-        </div>
-      `;
-      hideBranchOptions();
-      
-      // 重置状态
-      selectedTheme = null;
-      storyBackground = null;
-      backgroundSectionVisible = false;
-      
-      // 重新初始化主题选择事件
-      initThemeSelection();
+      // 只刷新冒险页面内容，不刷新整个页面
+      const contentArea = document.querySelector('.content');
+      if (contentArea) {
+        contentArea.innerHTML = Adventure();
+        setTimeout(() => {
+          initAdventure();
+        }, 0);
+      }
     }
   }
 
@@ -784,6 +707,52 @@ export function initAdventure() {
       addCharCount(storyGoalInput, 200);
     }
   }
+
+  // 自动读取历史冒险记录并渲染
+  function renderHistory() {
+    const history = adventureService.getStoryHistory();
+    if (history && history.length > 0) {
+      storyMessages.innerHTML = '';
+      history.forEach(story => {
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'story-message ai-story';
+        aiDiv.innerHTML = `
+          <div class="story-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3c0 1.5 1.5 3 3 3s3-1.5 3-3a3 3 0 0 0-3-3z"></path>
+              <path d="M19 3v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3"></path>
+              <path d="M21 9v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9"></path>
+              <path d="M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"></path>
+            </svg>
+          </div>
+          <div class="story-content">
+            <div class="story-text">${story.text}</div>
+            <div class="story-time">${story.timestamp ? new Date(story.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : ''}</div>
+          </div>
+        `;
+        storyMessages.appendChild(aiDiv);
+      });
+      storyMessages.scrollTop = storyMessages.scrollHeight;
+    }
+    updateActionButtons();
+  }
+
+  // 按照冒险历史控制按钮显示
+  function updateActionButtons() {
+    const history = adventureService.getStoryHistory();
+    if (history && history.length > 0) {
+      clearStoryBtn.style.display = '';
+      startNewBtn.style.display = 'none';
+    } else {
+      clearStoryBtn.style.display = 'none';
+      startNewBtn.style.display = '';
+    }
+    // 设置按钮始终显示（保险起见）
+    adventureSettingsBtn.style.display = '';
+  }
+
+  // 初始化时渲染历史
+  renderHistory();
 
   // 事件监听器
   startNewBtn.addEventListener('click', startNewAdventure);
